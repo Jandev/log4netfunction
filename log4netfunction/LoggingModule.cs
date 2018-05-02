@@ -9,12 +9,11 @@ namespace log4netfunction
 {
     public class LoggingModule : Autofac.Module
     {
-
         public LoggingModule(ILogger logger)
         {
             log4net.Config.BasicConfigurator.Configure(new FunctionLoggerAppender(logger));
-            
         }
+
         private void InjectLoggerProperties(object instance)
         {
             var instanceType = instance.GetType();
