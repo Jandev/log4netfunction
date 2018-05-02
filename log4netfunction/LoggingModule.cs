@@ -3,19 +3,17 @@ using System.Linq;
 using System.Reflection;
 using Autofac.Core;
 using log4net;
-using log4net.Repository.Hierarchy;
 using Microsoft.Extensions.Logging;
 
 namespace log4netfunction
 {
     public class LoggingModule : Autofac.Module
     {
-        private readonly ILogger logger;
 
         public LoggingModule(ILogger logger)
         {
-            this.logger = logger;
-            log4net.Config.BasicConfigurator.Configure();
+            log4net.Config.BasicConfigurator.Configure(new FunctionLoggerAppender(logger));
+            
         }
         private void InjectLoggerProperties(object instance)
         {
@@ -31,17 +29,8 @@ namespace log4netfunction
             // Set the properties located.
             foreach (var propToSet in properties)
             {
-                propToSet.SetValue(instance, GetLogger(instanceType), null);
+                propToSet.SetValue(instance, LogManager.GetLogger(instanceType), null);
             }
-        }
-
-        private ILog GetLogger(Type instanceType)
-        {
-            ILog log = LogManager.GetLogger(instanceType);
-            Logger log4NetLogger = (Logger) log.Logger;
-            log4NetLogger.RemoveAllAppenders();
-            log4NetLogger.AddAppender(new FunctionLoggerAppender(this.logger));
-            return log;
         }
 
         private void OnComponentPreparing(object sender, PreparingEventArgs e)
@@ -51,7 +40,7 @@ namespace log4netfunction
                 {
                     new ResolvedParameter(
                         (p, i) => p.ParameterType == typeof(ILog),
-                        (p, i) => GetLogger(p.Member.DeclaringType)
+                        (p, i) => LogManager.GetLogger(p.Member.DeclaringType)
                     ),
                 });
         }
