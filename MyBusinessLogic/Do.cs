@@ -1,4 +1,5 @@
-﻿using log4net;
+﻿using System;
+using log4net;
 
 namespace MyBusinessLogic
 {
@@ -12,6 +13,10 @@ namespace MyBusinessLogic
         }
         public void Stuff()
         {
+            if (new Random().Next() % 10 == 0)
+            {
+                throw new ArgumentException("Some major exception which isn't catched!");
+            }
             log.Debug("My debug message");
 
             log.Info("Some informational message");
